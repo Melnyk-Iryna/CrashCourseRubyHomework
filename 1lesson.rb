@@ -1,64 +1,87 @@
-# frozen_string_literal: true
-require_relative '1lesson'
+require 'date'
 
-require 'minitest/autorun'
+class Student
+  # Змінна класу для зберігання всіх студентів
+  @@students = []
 
+  attr_accessor :surname, :name, :date_of_birth
 
+  # Ініціалізуємо студента з ім'ям, прізвищем та датою народження
+  def initialize(surname, name, date_of_birth)
+    @surname = surname
+    @name = name
+    @date_of_birth = Date.parse(date_of_birth)
 
-require_relative '1lesson'
+    # Перевірка, що дата народження у минулому
+    if @date_of_birth > Date.today
+      raise ArgumentError, 'Дата народження має бути в минулому'
+    end
 
-class StudentTest < Minitest::Test
-  def setup
-    # Очищення змінної класу перед кожним тестом
-    Student.class_variable_set(:@@students, [])
-    # Створюємо студентів
-    @student1 = Student.new('Fedorenko', 'Yelyzaveta', "2004-09-12")
-    @student2 = Student.new('Surname', 'Yelyzaveta', "2004-09-12")
+    # Додаємо студента до списку, якщо його ще немає
+    add_student
   end
 
-  def teardown
-    # Очищення змінної класу після кожного тесту
-    Student.class_variable_set(:@@students, [])
+  # Метод для обчислення віку
+  def calculate_age
+    today = Date.today
+    age = today.year - @date_of_birth.year
+    # Якщо день народження ще не пройшов цього року, зменшуємо вік на 1
+    age -= 1 if today < Date.new(today.year, @date_of_birth.month, @date_of_birth.day)
+    age
   end
 
-  def test_for_invalid_date
-    assert_raises(ArgumentError) do
-      Student.new('Some', 'Thing', '3000-01-01') # Дата в майбутньому
+  # Метод для додавання студента до загального списку
+  def add_student
+    unless @@students.any? { |student| student.surname == @surname && student.name == @name && student.date_of_birth == @date_of_birth }
+      @@students << self
     end
   end
 
-  def test_add_duplicate_student
-    assert_equal 2, Student.all_students.size # Всього має бути 2 студенти спочатку
-    Student.new('Fedorenko', 'Yelyzaveta', "2004-09-12") # Дублікат не додасться
-    assert_equal 2, Student.all_students.size # Перевіряємо, що студенти не дублюються
+  # Метод для видалення студента зі списку
+  def remove_student
+    @@students.delete(self)
   end
 
-  def test_get_by_name
-    result = Student.get_students_by_name('Yelyzaveta')
-    assert_equal [@student1, @student2], result
+  # Метод для отримання студентів за віком
+  def self.get_students_by_age(age)
+    @@students.select { |student| student.calculate_age == age }
   end
 
-  def test_remove_student
-    @student1.remove_student
-    @student2.remove_student
-    assert_equal [], Student.get_students_by_name('Yelyzaveta')
+  # Метод для отримання студентів за ім'ям
+  def self.get_students_by_name(name)
+    @@students.select { |student| student.name == name }
   end
 
-  def test_get_by_age
-    result = Student.get_students_by_age(20) # Вік студентів залежить від поточної дати
-    assert_includes result, @student1
-    assert_includes result, @student2
+  # Метод для отримання всіх студентів
+  def self.all_students
+    @@students
   end
 
-  def test_calculate_age
-    assert_equal 20, @student1.calculate_age # Тест може залежати від поточної дати
+  # Метод для виведення інформації про всіх студентів
+  def self.display_all_students
+    if @@students.empty?
+      puts "Список студентів порожній"
+    else
+      @@students.each do |student|
+        student.display_student_info
+      end
+    end
   end
 
-  def test_initialize
-    student = Student.new("Will", "William", "2004-07-07")
-    assert_equal "Will", student.surname
-    assert_equal "William", student.name
-    assert_equal Date.parse("2004-07-07"), student.date_of_birth
-    assert_equal 20, student.calculate_age # Тест може залежати від поточної дати
+  # Метод для виведення інформації про конкретного студента
+  def display_student_info
+    puts "Ім'я: #{@name}"
+    puts "Прізвище: #{@surname}"
+    puts "Дата народження: #{@date_of_birth}"
+    puts "Вік: #{calculate_age}"
+    puts "-" * 20
   end
 end
+
+# Приклад використання:
+student1 = Student.new("Коваль", "Андрій", "2000-05-15")
+student2 = Student.new("Іваненко", "Марія", "1995-11-23")
+student3 = Student.new("Коваль", "Андрій", "2000-05-15") # Цей студент не додасться, бо він дублікат
+
+# Вивести всіх студентів
+Student.display_all_students
