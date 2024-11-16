@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Project.iml" filepath="$PROJECT_DIR$/.idea/Project.iml" />
+<<<<<<< HEAD
+      <module fileurl="file://$PROJECT_DIR$/.idea/Ira.iml" filepath="$PROJECT_DIR$/.idea/Ira.iml" />
+>>>>>>> 1dd2d3e (Додано Gemfile, Gemfile.lock та файли тестів)
     </modules>
   </component>
 </project>
